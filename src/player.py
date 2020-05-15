@@ -11,16 +11,18 @@ class Player:
     def __init__(self, game, depth, player):
         self.game = game
         self.depth = depth
-        self.player = player
+        self.player = player# 1 is maxie, 2 is minnie
 
     def next_move(self):
         moves = []
         game = copy.deepcopy(self.game)
         val = self.search(game, self.depth, moves, -100000, 100000)
-        moves = sorted(moves, key=lambda x:x[1])        #possible chance
+
+        #element of chance when sort the list
+        moves = sorted(moves, key=lambda x:x[1], reverse=(self.player==1))        
+
         logging.debug(moves)
-        logging.debug("best move: " + str(moves[-1]))
-        logging.debug("best value: " + str(val))
+        logging.debug("best move: " + str(moves[0]))
         return moves[0][0]
 
     #minimax with alpha beta pruning
@@ -31,17 +33,12 @@ class Player:
 
         if game.isOver():
             if game.isMyTurn():
-#                logging.debug("the best for maxie is: " + str(m) + " with value 100000 at depth: " + str(depth))
                 return -100000
-#            logging.debug("the best for minnie is: " + str(m) + " with value -100000 at depth: " + str(depth))
             return 100000
 
         moves = game.moves()
-        bMove = 0
+        bMove = moves[0]
         bVal = alpha if game.isMyTurn() else beta
-
-#        logging.debug("player is: " + str(player))
-#        logging.debug(str(len(moves)) + " many moves at depth: " + str(depth))
 
         for m in moves:
 
@@ -50,7 +47,7 @@ class Player:
 
             game.move(m)
             val = self.search(game, depth - 1, moveTierList, alpha, beta)
-            game.undo(m)
+            game.undo()
 
             if game.isMyTurn():
                 if val > bVal:
